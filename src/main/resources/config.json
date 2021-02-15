@@ -1,0 +1,6 @@
+{
+  "connection" : "127.0.0.1",
+  "username" : "Administrator",
+  "password" : "passw0rd",
+  "bucket" : "default"
+}
