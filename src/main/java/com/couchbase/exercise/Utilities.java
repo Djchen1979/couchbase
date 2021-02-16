@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Utilities {
     private Cluster cluster;
@@ -45,7 +46,7 @@ public class Utilities {
             loadDocument(fileName);
             return;
         }
-        Files.list(filePath).forEach(path -> {
+        Files.list(filePath).parallel().forEach(path -> {
             try {
                 String name = path.toFile().getAbsolutePath();
                 if (pattern == null || pattern.equals("")) {
