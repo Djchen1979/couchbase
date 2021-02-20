@@ -14,12 +14,36 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class Utilities {
     private Cluster cluster;
     private Bucket bucket;
     private Collection collection;
+
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
+    }
+
+    public Bucket getBucket() {
+        return bucket;
+    }
+
+    public void setBucket(Bucket bucket) {
+        this.bucket = bucket;
+    }
+
+    public Collection getCollection() {
+        return collection;
+    }
+
+    public void setCollection(Collection collection) {
+        this.collection = collection;
+    }
+
     private String configFile = "config.json";
 
     public static void main(String... args) throws IOException {
@@ -36,6 +60,33 @@ public class Utilities {
         loadDocument.loadDocument(fileName, pattern);
     }
 
+    public void doLoad(Runnable toLoad) {
+        toLoad.run();
+    }
+
+    public void loadEmployee(String fileName) {
+        Path filePath = Paths.get(fileName).toAbsolutePath();
+        if (!Files.exists(filePath)) {
+            System.out.println(fileName + " does not exist!");
+            return;
+        }
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(filePath.toAbsolutePath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson  = gsonBuilder.create();
+        Employee employee = gson.fromJson(content, Employee.class);
+
+        String docID = "docid-" + System.currentTimeMillis();
+        MutationResult result = collection.upsert(docID, employee);
+        System.out.println(result.toString());
+        return;
+    }
+
     public void loadDocument(String fileName, String pattern) throws IOException {
         Path filePath = Paths.get(fileName);
         if (!Files.exists(filePath)) {
@@ -43,31 +94,29 @@ public class Utilities {
             return;
         }
         if(!Files.isDirectory(filePath)) {
-            loadDocument(fileName);
+            doLoad(() -> loadEmployee(filePath.toFile().getAbsolutePath()));
             return;
         }
         Files.list(filePath).parallel().forEach(path -> {
-            try {
-                String name = path.toFile().getAbsolutePath();
-                if (pattern == null || pattern.equals("")) {
-                    loadDocument(name);
-                } else if (name.matches(pattern)) {
-                    loadDocument(name);
-                }
-            } catch (IOException e) {
-                // print error stracktrace to allow following document upload
-                e.printStackTrace();
+            String name = path.toFile().getAbsolutePath();
+            if (pattern == null || pattern.equals("") || name.matches(pattern)) {
+                doLoad(() -> loadEmployee(name));
             }
         });
     }
 
-    public void loadDocument(String fileName) throws IOException {
+    public void loadDocument(String fileName) {
         Path filePath = Paths.get(fileName).toAbsolutePath();
         if (!Files.exists(filePath)) {
             System.out.println(fileName + " does not exist!");
             return;
         }
-        String content = new String(Files.readAllBytes(filePath.toAbsolutePath()));
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(filePath.toAbsolutePath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String docID = "docid-" + System.currentTimeMillis();
         MutationResult result = collection.upsert(docID, content);
         System.out.println(result.toString());
