@@ -56,8 +56,8 @@ public class Utilities {
         String pattern;
         pattern = scanner.nextLine();
 
-        Utilities loadDocument = new Utilities();
-        loadDocument.loadDocument(fileName, pattern);
+        Utilities utils = new Utilities();
+        utils.loadDocument(fileName, pattern);
     }
 
     public void doLoad(Runnable toLoad) {
@@ -94,12 +94,14 @@ public class Utilities {
             return;
         }
         if(!Files.isDirectory(filePath)) {
+            //TODO
             doLoad(() -> loadEmployee(filePath.toFile().getAbsolutePath()));
             return;
         }
         Files.list(filePath).parallel().forEach(path -> {
             String name = path.toFile().getAbsolutePath();
             if (pattern == null || pattern.equals("") || name.matches(pattern)) {
+                //TODO
                 doLoad(() -> loadEmployee(name));
             }
         });
