@@ -25,3 +25,13 @@ java -jar build/libs/couchbase-1.0-SNAPSHOT.jar
     "bucket" : "default"
 }
 ```
+### sample input file
+```
+{
+    "id" : "1",
+    "firstName" : "John",
+    "lastName" : "Smith",
+    "city" : "San Francisco",
+    "state" : "CA"
+}
+```
